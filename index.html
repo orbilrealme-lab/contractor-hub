@@ -41,6 +41,19 @@
     #adminPanel {
       display:none;
     }
+
+    /* 🖼 PROJECT GRID */
+    .grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
+      gap:15px;
+    }
+
+    img {
+      width:100%;
+      border-radius:10px;
+      margin-bottom:10px;
+    }
   </style>
 </head>
 
@@ -57,14 +70,31 @@
   <div id="jobList"></div>
 </section>
 
+<!-- PROJECTS -->
+<section id="projectSection">
+  <h3>Projects</h3>
+  <div id="projectList" class="grid"></div>
+</section>
+
 <!-- ADMIN -->
 <section id="adminPanel">
   <h3>Admin Panel</h3>
 
+  <!-- JOB FORM -->
   <div class="card">
+    <h4>Post Job</h4>
     <input id="jobTitle" placeholder="Job title"><br><br>
     <textarea id="jobDesc" placeholder="Job description"></textarea><br><br>
-    <button class="btn" id="postBtn">Post Job</button>
+    <button class="btn" id="postJobBtn">Post Job</button>
+  </div>
+
+  <!-- PROJECT FORM -->
+  <div class="card">
+    <h4>Add Project</h4>
+    <input id="projectTitle" placeholder="Project title"><br><br>
+    <input id="projectImage" placeholder="Image URL"><br><br>
+    <textarea id="projectDesc" placeholder="Description"></textarea><br><br>
+    <button class="btn" id="postProjectBtn">Post Project</button>
   </div>
 </section>
 
@@ -80,7 +110,6 @@
 <script>
 try {
 
-  // 🔥 Firebase Config
   const firebaseConfig = {
     apiKey: "AIzaSyDl9EaTbDx0MTV4c0bIJ4ZQsBfpJ3zqeYQ",
     authDomain: "contractor-hub-d69e9.firebaseapp.com",
@@ -97,10 +126,13 @@ try {
   const provider = new firebase.auth.GoogleAuthProvider();
 
   const jobsRef = db.collection("jobs");
+  const projectsRef = db.collection("projects");
 
   const loginBtn = document.getElementById("loginBtn");
   const adminPanel = document.getElementById("adminPanel");
+
   const jobList = document.getElementById("jobList");
+  const projectList = document.getElementById("projectList");
 
   // 🔐 LOGIN
   loginBtn.addEventListener("click", () => {
@@ -108,82 +140,96 @@ try {
       .catch(err => alert(err.message));
   });
 
-  // 🔐 LEVEL 2 ADMIN LOCK
+  // 🔐 ADMIN LOCK
   const allowedAdmins = [
-    "orbil.realme@gmail.com"  // 👈 CHANGE THIS TO YOUR EMAIL
+    "orbil.realme@gmail.com"
   ];
 
   auth.onAuthStateChanged(user => {
 
-    if (user) {
-
-      if (allowedAdmins.includes(user.email)) {
-        loginBtn.innerText = "Logged In (Admin)";
-        adminPanel.style.display = "block";
-      } else {
-        alert("Access denied: Not admin");
-        auth.signOut();
-        loginBtn.innerText = "Admin Login";
-        adminPanel.style.display = "none";
-      }
-
+    if (user && allowedAdmins.includes(user.email)) {
+      loginBtn.innerText = "Logged In (Admin)";
+      adminPanel.style.display = "block";
+    } else if (user) {
+      alert("Access denied");
+      auth.signOut();
     } else {
-      loginBtn.innerText = "Admin Login";
       adminPanel.style.display = "none";
+      loginBtn.innerText = "Admin Login";
     }
 
   });
 
   // 📝 POST JOB
-  document.getElementById("postBtn").addEventListener("click", async () => {
+  document.getElementById("postJobBtn").addEventListener("click", async () => {
 
-    const title = document.getElementById("jobTitle").value;
-    const desc = document.getElementById("jobDesc").value;
+    const title = jobTitle.value;
+    const desc = jobDesc.value;
 
-    if (!title || !desc) {
-      alert("Please fill all fields");
-      return;
-    }
+    await jobsRef.add({
+      title,
+      desc,
+      created: new Date()
+    });
 
-    try {
-      await jobsRef.add({
-        title: title,
-        desc: desc,
-        created: new Date()
-      });
-
-      document.getElementById("jobTitle").value = "";
-      document.getElementById("jobDesc").value = "";
-
-    } catch (err) {
-      alert("Error: " + err.message);
-    }
-
+    jobTitle.value = "";
+    jobDesc.value = "";
   });
 
-  // 📡 LIVE JOBS
-  jobsRef.onSnapshot(snapshot => {
+  // 🏗 POST PROJECT
+  document.getElementById("postProjectBtn").addEventListener("click", async () => {
 
+    const title = projectTitle.value;
+    const imageUrl = projectImage.value;
+    const description = projectDesc.value;
+
+    await projectsRef.add({
+      title,
+      imageUrl,
+      description,
+      created: new Date()
+    });
+
+    projectTitle.value = "";
+    projectImage.value = "";
+    projectDesc.value = "";
+  });
+
+  // 📡 JOBS LIVE
+  jobsRef.onSnapshot(snapshot => {
     jobList.innerHTML = "";
 
     snapshot.forEach(doc => {
       const job = doc.data();
 
-      const div = document.createElement("div");
-      div.className = "card";
-
-      div.innerHTML = `
-        <h4>${job.title}</h4>
-        <p>${job.desc}</p>
+      jobList.innerHTML += `
+        <div class="card">
+          <h4>${job.title}</h4>
+          <p>${job.desc}</p>
+        </div>
       `;
-
-      jobList.appendChild(div);
     });
+  });
 
+  // 📡 PROJECTS LIVE
+  projectsRef.onSnapshot(snapshot => {
+    projectList.innerHTML = "";
+
+    snapshot.forEach(doc => {
+      const p = doc.data();
+
+      projectList.innerHTML += `
+        <div class="card">
+          <img src="${p.imageUrl}" />
+          <h4>${p.title}</h4>
+          <p>${p.description}</p>
+        </div>
+      `;
+    });
   });
 
 } catch (e) {
-  console.error("Firebase error:", e);
+  console.error(e);
 }
 </script>
 
