@@ -51,12 +51,13 @@
   <button class="btn" id="loginBtn">Admin Login</button>
 </header>
 
-<!-- JOBS SECTION FIXED -->
+<!-- JOBS -->
 <section id="jobSection">
   <h3>Jobs</h3>
   <div id="jobList"></div>
 </section>
 
+<!-- ADMIN -->
 <section id="adminPanel">
   <h3>Admin Panel</h3>
 
@@ -79,6 +80,7 @@
 <script>
 try {
 
+  // 🔥 Firebase Config
   const firebaseConfig = {
     apiKey: "AIzaSyDl9EaTbDx0MTV4c0bIJ4ZQsBfpJ3zqeYQ",
     authDomain: "contractor-hub-d69e9.firebaseapp.com",
@@ -106,12 +108,30 @@ try {
       .catch(err => alert(err.message));
   });
 
-  // 👤 AUTH STATE
+  // 🔐 LEVEL 2 ADMIN LOCK
+  const allowedAdmins = [
+    "YOUR_EMAIL@gmail.com"  // 👈 CHANGE THIS TO YOUR EMAIL
+  ];
+
   auth.onAuthStateChanged(user => {
+
     if (user) {
-      loginBtn.innerText = "Logged In";
-      adminPanel.style.display = "block";
+
+      if (allowedAdmins.includes(user.email)) {
+        loginBtn.innerText = "Logged In (Admin)";
+        adminPanel.style.display = "block";
+      } else {
+        alert("Access denied: Not admin");
+        auth.signOut();
+        loginBtn.innerText = "Admin Login";
+        adminPanel.style.display = "none";
+      }
+
+    } else {
+      loginBtn.innerText = "Admin Login";
+      adminPanel.style.display = "none";
     }
+
   });
 
   // 📝 POST JOB
@@ -141,7 +161,7 @@ try {
 
   });
 
-  // 📡 LIVE JOBS (FIXED)
+  // 📡 LIVE JOBS
   jobsRef.onSnapshot(snapshot => {
 
     jobList.innerHTML = "";
