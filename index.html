@@ -1,17 +1,237 @@
-<script>
-console.log("SCRIPT STARTED - RECOVERY MODE");
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Contractor Hub</title>
 
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("DOM LOADED - PAGE IS ALIVE");
+  <style>
+    body {
+      background:#0f172a;
+      color:white;
+      font-family: Arial;
+      margin:0;
+    }
+
+    header {
+      padding:20px;
+      background:#111827;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    .btn {
+      background:#38bdf8;
+      border:none;
+      padding:10px 15px;
+      border-radius:8px;
+      cursor:pointer;
+    }
+
+    section {
+      padding:20px;
+    }
+
+    .card {
+      background:#1f2937;
+      padding:15px;
+      margin:10px 0;
+      border-radius:10px;
+    }
+
+    #adminPanel {
+      display:none;
+    }
+
+    /* 🖼 PROJECT GRID */
+    .grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
+      gap:15px;
+    }
+
+    img {
+      width:100%;
+      border-radius:10px;
+      margin-bottom:10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h2>Contractor Hub</h2>
+  <button class="btn" id="loginBtn">Admin Login</button>
+</header>
+
+<!-- JOBS -->
+<section id="jobSection">
+  <h3>Jobs</h3>
+  <div id="jobList"></div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projectSection">
+  <h3>Projects</h3>
+  <div id="projectList" class="grid"></div>
+</section>
+
+<!-- ADMIN -->
+<section id="adminPanel">
+  <h3>Admin Panel</h3>
+
+  <!-- JOB FORM -->
+  <div class="card">
+    <h4>Post Job</h4>
+    <input id="jobTitle" placeholder="Job title"><br><br>
+    <textarea id="jobDesc" placeholder="Job description"></textarea><br><br>
+    <button class="btn" id="postJobBtn">Post Job</button>
+  </div>
+
+  <!-- PROJECT FORM -->
+  <div class="card">
+    <h4>Add Project</h4>
+    <input id="projectTitle" placeholder="Project title"><br><br>
+    <input id="projectImage" placeholder="Image URL"><br><br>
+    <textarea id="projectDesc" placeholder="Description"></textarea><br><br>
+    <button class="btn" id="postProjectBtn">Post Project</button>
+  </div>
+</section>
+
+<footer style="padding:20px; text-align:center;">
+  © 2026 Contractor Hub
+</footer>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+try {
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDl9EaTbDx0MTV4c0bIJ4ZQsBfpJ3zqeYQ",
+    authDomain: "contractor-hub-d69e9.firebaseapp.com",
+    projectId: "contractor-hub-d69e9",
+    storageBucket: "contractor-hub-d69e9.firebasestorage.app",
+    messagingSenderId: "114205018575",
+    appId: "1:114205018575:web:723805aa99a7e9d0372aba"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  const provider = new firebase.auth.GoogleAuthProvider();
+
+  const jobsRef = db.collection("jobs");
+  const projectsRef = db.collection("projects");
 
   const loginBtn = document.getElementById("loginBtn");
+  const adminPanel = document.getElementById("adminPanel");
 
-  if (loginBtn) {
-    loginBtn.addEventListener("click", () => {
-      alert("BUTTON WORKS - JAVASCRIPT IS OK");
+  const jobList = document.getElementById("jobList");
+  const projectList = document.getElementById("projectList");
+
+  // 🔐 LOGIN
+  loginBtn.addEventListener("click", () => {
+    auth.signInWithPopup(provider)
+      .catch(err => alert(err.message));
+  });
+
+  // 🔐 ADMIN LOCK
+  const allowedAdmins = [
+    "orbil.realme@gmail.com"
+  ];
+
+  auth.onAuthStateChanged(user => {
+
+    if (user && allowedAdmins.includes(user.email)) {
+      loginBtn.innerText = "Logged In (Admin)";
+      adminPanel.style.display = "block";
+    } else if (user) {
+      alert("Access denied");
+      auth.signOut();
+    } else {
+      adminPanel.style.display = "none";
+      loginBtn.innerText = "Admin Login";
+    }
+
+  });
+
+  // 📝 POST JOB
+  document.getElementById("postJobBtn").addEventListener("click", async () => {
+
+    const title = jobTitle.value;
+    const desc = jobDesc.value;
+
+    await jobsRef.add({
+      title,
+      desc,
+      created: new Date()
     });
-  } else {
-    console.error("loginBtn NOT FOUND");
-  }
-});
+
+    jobTitle.value = "";
+    jobDesc.value = "";
+  });
+
+  // 🏗 POST PROJECT
+  document.getElementById("postProjectBtn").addEventListener("click", async () => {
+
+    const title = projectTitle.value;
+    const imageUrl = projectImage.value;
+    const description = projectDesc.value;
+
+    await projectsRef.add({
+      title,
+      imageUrl,
+      description,
+      created: new Date()
+    });
+
+    projectTitle.value = "";
+    projectImage.value = "";
+    projectDesc.value = "";
+  });
+
+  // 📡 JOBS LIVE
+  jobsRef.onSnapshot(snapshot => {
+    jobList.innerHTML = "";
+
+    snapshot.forEach(doc => {
+      const job = doc.data();
+
+      jobList.innerHTML += `
+        <div class="card">
+          <h4>${job.title}</h4>
+          <p>${job.desc}</p>
+        </div>
+      `;
+    });
+  });
+
+  // 📡 PROJECTS LIVE
+  projectsRef.onSnapshot(snapshot => {
+    projectList.innerHTML = "";
+
+    snapshot.forEach(doc => {
+      const p = doc.data();
+
+      projectList.innerHTML += `
+        <div class="card">
+          <img src="${p.imageUrl}" />
+          <h4>${p.title}</h4>
+          <p>${p.description}</p>
+        </div>
+      `;
+    });
+  });
+
+} catch (e) {
+  console.error(e);
+}
 </script>
+
+</body>
+</html>
