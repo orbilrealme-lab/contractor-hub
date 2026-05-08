@@ -2,11 +2,72 @@
 <html>
 <head>
   <title>Contractor Hub</title>
+
+  <style>
+    body {
+      background:#0f172a;
+      color:white;
+      font-family: Arial;
+      margin:0;
+    }
+
+    header {
+      padding:20px;
+      background:#111827;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    .btn {
+      background:#38bdf8;
+      border:none;
+      padding:10px 15px;
+      border-radius:8px;
+      cursor:pointer;
+    }
+
+    section {
+      padding:20px;
+    }
+
+    .card {
+      background:#1f2937;
+      padding:15px;
+      margin:10px 0;
+      border-radius:10px;
+    }
+  </style>
 </head>
 
-<body style="background:#0f172a; color:white; font-family:Arial;">
+<body>
 
-<h1>RECOVERY MODE WORKS 🚀</h1>
+<header>
+  <h2>Contractor Hub</h2>
+  <button class="btn">Admin Login</button>
+</header>
+
+<section>
+  <h3>Jobs</h3>
+
+  <div class="card">
+    Sample Job 1
+  </div>
+
+  <div class="card">
+    Sample Job 2
+  </div>
+</section>
+
+<section>
+  <h3>Admin Panel (hidden later)</h3>
+
+  <div class="card">
+    <input placeholder="Job title"><br><br>
+    <textarea placeholder="Job description"></textarea><br><br>
+    <button class="btn">Post Job</button>
+  </div>
+</section>
 
 </body>
 </html>
