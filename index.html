@@ -213,5 +213,72 @@
   © 2026 Contractor Hub. All rights reserved.
 </footer>
 
+ <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { 
+    getFirestore, 
+    collection, 
+    addDoc, 
+    onSnapshot, 
+    serverTimestamp 
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // 1. YOUR FIREBASE CONFIG (replace this!)
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  // 2. INIT FIREBASE
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const jobsRef = collection(db, "jobs");
+
+  // 3. POST JOB
+  window.addJob = async function () {
+    const title = document.getElementById("jobTitle").value;
+    const desc = document.getElementById("jobDesc").value;
+
+    if (!title || !desc) return alert("Please fill all fields");
+
+    await addDoc(jobsRef, {
+      title,
+      desc,
+      created: serverTimestamp()
+    });
+
+    document.getElementById("jobTitle").value = "";
+    document.getElementById("jobDesc").value = "";
+  };
+
+  // 4. REAL-TIME LOAD JOBS
+  const jobList = document.getElementById("jobList");
+
+  onSnapshot(jobsRef, (snapshot) => {
+    jobList.innerHTML = "";
+
+    snapshot.forEach((doc) => {
+      const job = doc.data();
+
+      const card = document.createElement("div");
+      card.className = "card";
+
+      card.innerHTML = `
+        <h4>${job.title}</h4>
+        <p>${job.desc}</p>
+        <span class="tag">Live</span>
+      `;
+
+      jobList.prepend(card);
+    });
+  });
+
+</script>
+ 
 </body>
 </html>
