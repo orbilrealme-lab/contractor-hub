@@ -1,38 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Contractor Hub</title>
+
+  <style>
+    body {
+      background:#0f172a;
+      color:white;
+      font-family: Arial;
+      margin:0;
+    }
+
+    header {
+      padding:20px;
+      background:#111827;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    .btn {
+      background:#38bdf8;
+      border:none;
+      padding:10px 15px;
+      border-radius:8px;
+      cursor:pointer;
+    }
+
+    section {
+      padding:20px;
+    }
+
+    .card {
+      background:#1f2937;
+      padding:15px;
+      margin:10px 0;
+      border-radius:10px;
+    }
+
+    #adminPanel {
+      display:none;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h2>Contractor Hub</h2>
+  <button class="btn" id="loginBtn">Admin Login</button>
+</header>
+
+<section>
+  <h3>Jobs</h3>
+
+  <div class="card">Sample Job 1</div>
+  <div class="card">Sample Job 2</div>
+</section>
+
+<section id="adminPanel">
+  <h3>Admin Panel</h3>
+
+  <div class="card">
+    <input id="jobTitle" placeholder="Job title"><br><br>
+    <textarea id="jobDesc" placeholder="Job description"></textarea><br><br>
+    <button class="btn" id="postBtn">Post Job</button>
+  </div>
+</section>
+
+<footer style="padding:20px; text-align:center;">
+  © 2026 Contractor Hub
+</footer>
+
+<!-- FIREBASE (SAFE VERSION - COMPAT SDK) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyDl9EaTbDx0MTV4c0bIJ4ZQsBfpJ3zqeYQ",
-  authDomain: "contractor-hub-d69e9.firebaseapp.com",
-  projectId: "contractor-hub-d69e9",
-  storageBucket: "contractor-hub-d69e9.firebasestorage.app",
-  messagingSenderId: "114205018575",
-  appId: "1:114205018575:web:723805aa99a7e9d0372aba"
-};
+try {
 
-firebase.initializeApp(firebaseConfig);
+  // 🔥 Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyDl9EaTbDx0MTV4c0bIJ4ZQsBfpJ3zqeYQ",
+    authDomain: "contractor-hub-d69e9.firebaseapp.com",
+    projectId: "contractor-hub-d69e9",
+    storageBucket: "contractor-hub-d69e9.firebasestorage.app",
+    messagingSenderId: "114205018575",
+    appId: "1:114205018575:web:723805aa99a7e9d0372aba"
+  };
 
-const auth = firebase.auth();
-const provider = new firebase.auth.GoogleAuthProvider();
+  firebase.initializeApp(firebaseConfig);
 
-window.addEventListener("DOMContentLoaded", () => {
+  const auth = firebase.auth();
+  const provider = new firebase.auth.GoogleAuthProvider();
 
-  const loginBtn = document.querySelector("header .btn");
-  const adminPanel = document.querySelectorAll("section")[1];
+  window.addEventListener("DOMContentLoaded", () => {
 
-  loginBtn.addEventListener("click", () => {
-    auth.signInWithPopup(provider)
-      .then(() => console.log("logged in"))
-      .catch(err => alert(err.message));
+    const loginBtn = document.getElementById("loginBtn");
+    const adminPanel = document.getElementById("adminPanel");
+
+    // 🔐 LOGIN
+    loginBtn.addEventListener("click", () => {
+      auth.signInWithPopup(provider)
+        .then((result) => {
+          console.log("Logged in:", result.user.email);
+        })
+        .catch((err) => {
+          console.error(err);
+          alert(err.message);
+        });
+    });
+
+    // 👤 AUTH STATE
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        loginBtn.innerText = "Logged In";
+        adminPanel.style.display = "block";
+      }
+    });
+
   });
 
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      loginBtn.innerText = "Logged In";
-      adminPanel.style.display = "block";
-    }
-  });
-
-});
+} catch (e) {
+  console.error("Firebase crashed:", e);
+}
 </script>
+
+</body>
+</html>
