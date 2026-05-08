@@ -1,66 +1,57 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Contractor Hub</title>
+<script type="module">
 
-<style>
-  body {
-    background:#0f172a;
-    color:white;
-    font-family: Arial;
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+
+// 🔥 FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyDl9EaTbDx0MTV4c0bIJ4ZQsBfpJ3zqeYQ",
+  authDomain: "contractor-hub-d69e9.firebaseapp.com",
+  projectId: "contractor-hub-d69e9",
+  storageBucket: "contractor-hub-d69e9.firebasestorage.app",
+  messagingSenderId: "114205018575",
+  appId: "1:114205018575:web:723805aa99a7e9d0372aba"
+};
+
+
+// 🚀 INIT FIREBASE
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+
+// 🔐 LOGIN (SAFE - waits for page load)
+window.addEventListener("DOMContentLoaded", () => {
+
+  const loginBtn = document.getElementById("loginBtn");
+  const adminPanel = document.getElementById("adminPanel");
+
+  if (loginBtn) {
+
+    loginBtn.addEventListener("click", async () => {
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (err) {
+        alert("Login error: " + err.message);
+      }
+    });
+
   }
-  header {
-    padding:20px;
-    background:#111827;
-  }
-  .card {
-    background:#1f2937;
-    padding:15px;
-    margin:10px;
-    border-radius:10px;
-  }
-  .btn {
-    padding:10px 15px;
-    background:#38bdf8;
-    border:none;
-    cursor:pointer;
-    border-radius:8px;
-  }
-</style>
 
-</head>
+  // 👤 AUTH STATE
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      if (adminPanel) adminPanel.style.display = "block";
+      loginBtn.innerText = "Logged In";
+    }
+  });
 
-<body>
+});
 
-<header>
-  <h1>Contractor Hub</h1>
-
-  <button class="btn" id="loginBtn">
-    Admin Login
-  </button>
-</header>
-
-<h2 style="padding:20px;">Website is working 🚀</h2>
-
-<section id="jobs">
-  <h3 style="padding:20px;">Jobs</h3>
-  <div id="jobList"></div>
-</section>
-
-<section id="adminPanel" style="display:none;">
-  <h3 style="padding:20px;">Admin Panel</h3>
-
-  <input id="jobTitle" placeholder="Job title"><br><br>
-  <textarea id="jobDesc" placeholder="Job description"></textarea><br><br>
-
-  <button class="btn" onclick="addJob()">Post Job</button>
-</section>
-
-<footer style="padding:20px;">
-  © 2026 Contractor Hub
-</footer>
-
-</body>
-</html>
+</script>
