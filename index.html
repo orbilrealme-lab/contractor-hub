@@ -51,10 +51,10 @@
   <button class="btn" id="loginBtn">Admin Login</button>
 </header>
 
+<!-- JOBS SECTION FIXED -->
 <section id="jobSection">
   <h3>Jobs</h3>
-
-  <div class="card">Loading jobs...</div>
+  <div id="jobList"></div>
 </section>
 
 <section id="adminPanel">
@@ -79,7 +79,6 @@
 <script>
 try {
 
-  // 🔥 Firebase Config
   const firebaseConfig = {
     apiKey: "AIzaSyDl9EaTbDx0MTV4c0bIJ4ZQsBfpJ3zqeYQ",
     authDomain: "contractor-hub-d69e9.firebaseapp.com",
@@ -99,7 +98,7 @@ try {
 
   const loginBtn = document.getElementById("loginBtn");
   const adminPanel = document.getElementById("adminPanel");
-  const jobSection = document.getElementById("jobSection");
+  const jobList = document.getElementById("jobList");
 
   // 🔐 LOGIN
   loginBtn.addEventListener("click", () => {
@@ -142,10 +141,10 @@ try {
 
   });
 
-  // 📡 LIVE JOBS
+  // 📡 LIVE JOBS (FIXED)
   jobsRef.onSnapshot(snapshot => {
 
-    jobSection.innerHTML = "<h3>Jobs</h3>";
+    jobList.innerHTML = "";
 
     snapshot.forEach(doc => {
       const job = doc.data();
@@ -158,7 +157,7 @@ try {
         <p>${job.desc}</p>
       `;
 
-      jobSection.appendChild(div);
+      jobList.appendChild(div);
     });
 
   });
