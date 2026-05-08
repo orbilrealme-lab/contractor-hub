@@ -1,160 +1,17 @@
-<!-- FIXED FIREBASE SCRIPT (STABLE VERSION) -->
 <script>
-try {
+console.log("SCRIPT STARTED - RECOVERY MODE");
 
-  console.log("SCRIPT LOADED OK");
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyDl9EaTbDx0MTV4c0bIJ4ZQsBfpJ3zqeYQ",
-    authDomain: "contractor-hub-d69e9.firebaseapp.com",
-    projectId: "contractor-hub-d69e9",
-    storageBucket: "contractor-hub-d69e9.firebasestorage.app",
-    messagingSenderId: "114205018575",
-    appId: "1:114205018575:web:723805aa99a7e9d0372aba"
-  };
-
-  firebase.initializeApp(firebaseConfig);
-
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-  const provider = new firebase.auth.GoogleAuthProvider();
-
-  const jobsRef = db.collection("jobs");
-  const projectsRef = db.collection("projects");
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOM LOADED - PAGE IS ALIVE");
 
   const loginBtn = document.getElementById("loginBtn");
-  const adminPanel = document.getElementById("adminPanel");
 
-  const jobList = document.getElementById("jobList");
-  const projectList = document.getElementById("projectList");
-
-  // INPUTS (SAFE CHECKS)
-  const jobTitle = document.getElementById("jobTitle");
-  const jobDesc = document.getElementById("jobDesc");
-
-  const projectTitle = document.getElementById("projectTitle");
-  const projectDesc = document.getElementById("projectDesc");
-  const projectImage = document.getElementById("projectImage"); // FILE INPUT
-
-  // 🔐 LOGIN
-  loginBtn.addEventListener("click", () => {
-    auth.signInWithPopup(provider)
-      .catch(err => alert(err.message));
-  });
-
-  // 🔐 ADMIN LOCK
-  const allowedAdmins = [
-    "orbil.realme@gmail.com"
-  ];
-
-  auth.onAuthStateChanged(user => {
-
-    if (user && allowedAdmins.includes(user.email)) {
-      loginBtn.innerText = "Logged In (Admin)";
-      adminPanel.style.display = "block";
-    } else if (user) {
-      alert("Access denied");
-      auth.signOut();
-    } else {
-      adminPanel.style.display = "none";
-      loginBtn.innerText = "Admin Login";
-    }
-
-  });
-
-  // 📝 POST JOB (SAFE)
-  document.getElementById("postJobBtn").addEventListener("click", async () => {
-
-    if (!jobTitle.value || !jobDesc.value) {
-      alert("Fill all job fields");
-      return;
-    }
-
-    await jobsRef.add({
-      title: jobTitle.value,
-      desc: jobDesc.value,
-      created: new Date()
+  if (loginBtn) {
+    loginBtn.addEventListener("click", () => {
+      alert("BUTTON WORKS - JAVASCRIPT IS OK");
     });
-
-    jobTitle.value = "";
-    jobDesc.value = "";
-  });
-
-  // 🖼 SAFE IMAGE CONVERTER (NO STORAGE NEEDED)
-  function readFile(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
+  } else {
+    console.error("loginBtn NOT FOUND");
   }
-
-  // 🏗 POST PROJECT (FIXED + SAFE)
-  document.getElementById("postProjectBtn").addEventListener("click", async () => {
-
-    const file = projectImage.files ? projectImage.files[0] : null;
-
-    if (!projectTitle.value || !projectDesc.value || !file) {
-      alert("Fill all fields + select image");
-      return;
-    }
-
-    try {
-
-      const imageBase64 = await readFile(file);
-
-      await projectsRef.add({
-        title: projectTitle.value,
-        description: projectDesc.value,
-        imageUrl: imageBase64,
-        created: new Date()
-      });
-
-      projectTitle.value = "";
-      projectDesc.value = "";
-      projectImage.value = "";
-
-    } catch (err) {
-      alert("Upload error: " + err.message);
-    }
-
-  });
-
-  // 📡 JOBS LIVE
-  jobsRef.onSnapshot(snapshot => {
-    jobList.innerHTML = "";
-
-    snapshot.forEach(doc => {
-      const job = doc.data();
-
-      jobList.innerHTML += `
-        <div class="card">
-          <h4>${job.title}</h4>
-          <p>${job.desc}</p>
-        </div>
-      `;
-    });
-  });
-
-  // 📡 PROJECTS LIVE
-  projectsRef.onSnapshot(snapshot => {
-    projectList.innerHTML = "";
-
-    snapshot.forEach(doc => {
-      const p = doc.data();
-
-      projectList.innerHTML += `
-        <div class="card">
-          <img src="${p.imageUrl}" style="width:100%; border-radius:10px;" />
-          <h4>${p.title}</h4>
-          <p>${p.description}</p>
-        </div>
-      `;
-    });
-  });
-
-} catch (e) {
-  console.error("FIREBASE ERROR:", e);
-}
+});
 </script>
