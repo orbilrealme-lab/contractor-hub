@@ -212,26 +212,6 @@
 <footer>
   © 2026 Contractor Hub. All rights reserved.
 </footer>
-<script>
-function addJob() {
-  const title = document.getElementById("jobTitle").value;
-  const desc = document.getElementById("jobDesc").value;
 
-  if (!title || !desc) return alert("Please fill in all fields");
-
-  const jobCard = document.createElement("div");
-  jobCard.className = "card";
-  jobCard.innerHTML = `
-    <h4>${title}</h4>
-    <p>${desc}</p>
-    <span class="tag">New</span>
-  `;
-
-  document.getElementById("jobList").prepend(jobCard);
-
-  document.getElementById("jobTitle").value = "";
-  document.getElementById("jobDesc").value = "";
-}
-</script>
 </body>
 </html>
