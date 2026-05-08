@@ -29,18 +29,16 @@ const firebaseConfig = {
 };
 
 
-// 🚀 INIT
+// 🚀 INIT FIREBASE
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-
-// 🧠 FIRESTORE
 const jobsRef = collection(db, "jobs");
 
 
-// 🔐 LOGIN (FIXED — NO MORE CLICK BUG)
+// 🔐 LOGIN (SAFE - prevents crash)
 window.addEventListener("DOMContentLoaded", () => {
 
   const loginBtn = document.getElementById("loginBtn");
@@ -50,28 +48,44 @@ window.addEventListener("DOMContentLoaded", () => {
       try {
         await signInWithPopup(auth, provider);
       } catch (err) {
+        console.error(err);
         alert("Login error: " + err.message);
       }
     });
+  } else {
+    console.error("loginBtn not found in HTML");
   }
 
 });
 
 
-// 👤 SHOW ADMIN PANEL AFTER LOGIN
+// 👤 AUTH STATE (SAFE)
 onAuthStateChanged(auth, (user) => {
+
+  const adminPanel = document.getElementById("adminPanel");
+  const loginBtn = document.getElementById("loginBtn");
+
   if (user) {
-    document.getElementById("adminPanel").style.display = "block";
-    document.getElementById("loginBtn").innerText = "Logged In";
+    if (adminPanel) adminPanel.style.display = "block";
+    if (loginBtn) loginBtn.innerText = "Logged In";
   }
+
 });
 
 
-// 📝 ADD JOB
+// 📝 ADD JOB (SAFE)
 window.addJob = async function () {
 
-  const title = document.getElementById("jobTitle").value;
-  const desc = document.getElementById("jobDesc").value;
+  const titleEl = document.getElementById("jobTitle");
+  const descEl = document.getElementById("jobDesc");
+
+  if (!titleEl || !descEl) {
+    alert("Job form not found");
+    return;
+  }
+
+  const title = titleEl.value;
+  const desc = descEl.value;
 
   if (!title || !desc) {
     alert("Please fill all fields");
@@ -85,35 +99,45 @@ window.addJob = async function () {
       created: serverTimestamp()
     });
 
-    document.getElementById("jobTitle").value = "";
-    document.getElementById("jobDesc").value = "";
+    titleEl.value = "";
+    descEl.value = "";
 
   } catch (err) {
+    console.error(err);
     alert("Error adding job: " + err.message);
   }
 };
 
 
-// 📡 REAL-TIME JOB DISPLAY
-const jobList = document.getElementById("jobList");
+// 📡 REAL-TIME JOB DISPLAY (FULLY SAFE - NO WHITE SCREEN CRASH)
+window.addEventListener("DOMContentLoaded", () => {
 
-onSnapshot(jobsRef, (snapshot) => {
+  const jobList = document.getElementById("jobList");
 
-  jobList.innerHTML = "";
+  if (!jobList) {
+    console.error("jobList not found in HTML");
+    return;
+  }
 
-  snapshot.forEach((doc) => {
-    const job = doc.data();
+  onSnapshot(jobsRef, (snapshot) => {
 
-    const card = document.createElement("div");
-    card.className = "card";
+    jobList.innerHTML = "";
 
-    card.innerHTML = `
-      <h4>${job.title}</h4>
-      <p>${job.desc}</p>
-      <span class="tag">LIVE</span>
-    `;
+    snapshot.forEach((doc) => {
+      const job = doc.data();
 
-    jobList.prepend(card);
+      const card = document.createElement("div");
+      card.className = "card";
+
+      card.innerHTML = `
+        <h4>${job.title || "No title"}</h4>
+        <p>${job.desc || "No description"}</p>
+        <span class="tag">LIVE</span>
+      `;
+
+      jobList.appendChild(card);
+    });
+
   });
 
 });
