@@ -69,5 +69,53 @@
   </div>
 </section>
 
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDl9EaTbDx0MTV4c0bIJ4ZQsBfpJ3zqeYQ",
+  authDomain: "contractor-hub-d69e9.firebaseapp.com",
+  projectId: "contractor-hub-d69e9",
+  storageBucket: "contractor-hub-d69e9.firebasestorage.app",
+  messagingSenderId: "114205018575",
+  appId: "1:114205018575:web:723805aa99a7e9d0372aba"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+window.addEventListener("DOMContentLoaded", () => {
+
+  const loginBtn = document.querySelector(".btn");
+  const adminPanel = document.querySelector("section:nth-of-type(2)");
+
+  // LOGIN
+  loginBtn.addEventListener("click", async () => {
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (err) {
+      alert("Login error: " + err.message);
+    }
+  });
+
+  // AUTH STATE
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      loginBtn.innerText = "Logged In";
+      adminPanel.style.display = "block";
+    }
+  });
+
+});
+
+</script>
 </body>
 </html>
