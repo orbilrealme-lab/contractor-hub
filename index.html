@@ -8,8 +8,6 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-
-// 🔥 FIREBASE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyDl9EaTbDx0MTV4c0bIJ4ZQsBfpJ3zqeYQ",
   authDomain: "contractor-hub-d69e9.firebaseapp.com",
@@ -19,34 +17,40 @@ const firebaseConfig = {
   appId: "1:114205018575:web:723805aa99a7e9d0372aba"
 };
 
-
-// 🚀 INIT FIREBASE
+// INIT
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-
-// 🔐 LOGIN (SAFE - waits for page load)
+// WAIT FOR PAGE FULLY LOADED
 window.addEventListener("DOMContentLoaded", () => {
 
   const loginBtn = document.getElementById("loginBtn");
   const adminPanel = document.getElementById("adminPanel");
 
-  if (loginBtn) {
-
-    loginBtn.addEventListener("click", async () => {
-      try {
-        await signInWithPopup(auth, provider);
-      } catch (err) {
-        alert("Login error: " + err.message);
-      }
-    });
-
+  // SAFETY CHECKS (THIS PREVENTS WHITE SCREEN CRASH)
+  if (!loginBtn) {
+    console.error("loginBtn NOT FOUND");
+    return;
   }
 
-  // 👤 AUTH STATE
+  loginBtn.addEventListener("click", async () => {
+    console.log("Login clicked");
+
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (err) {
+      console.error("LOGIN ERROR:", err);
+      alert(err.message);
+    }
+  });
+
+  // AUTH STATE
   onAuthStateChanged(auth, (user) => {
+
     if (user) {
+      console.log("User logged in:", user.email);
+
       if (adminPanel) adminPanel.style.display = "block";
       loginBtn.innerText = "Logged In";
     }
