@@ -1,6 +1,8 @@
-<!-- FIXED FIREBASE SCRIPT -->
+<!-- FIXED FIREBASE SCRIPT (STABLE VERSION) -->
 <script>
 try {
+
+  console.log("SCRIPT LOADED OK");
 
   const firebaseConfig = {
     apiKey: "AIzaSyDl9EaTbDx0MTV4c0bIJ4ZQsBfpJ3zqeYQ",
@@ -26,25 +28,13 @@ try {
   const jobList = document.getElementById("jobList");
   const projectList = document.getElementById("projectList");
 
-  // ✅ INPUTS
+  // INPUTS (SAFE CHECKS)
   const jobTitle = document.getElementById("jobTitle");
   const jobDesc = document.getElementById("jobDesc");
 
   const projectTitle = document.getElementById("projectTitle");
   const projectDesc = document.getElementById("projectDesc");
-
-  // ⚠️ NEW: file input (YOU MUST CHANGE HTML INPUT TO type="file")
-  const projectImageFile = document.getElementById("projectImage");
-
-  // 🧠 CONVERT IMAGE → BASE64
-  function toBase64(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = error => reject(error);
-    });
-  }
+  const projectImage = document.getElementById("projectImage"); // FILE INPUT
 
   // 🔐 LOGIN
   loginBtn.addEventListener("click", () => {
@@ -72,7 +62,7 @@ try {
 
   });
 
-  // 📝 POST JOB
+  // 📝 POST JOB (SAFE)
   document.getElementById("postJobBtn").addEventListener("click", async () => {
 
     if (!jobTitle.value || !jobDesc.value) {
@@ -90,19 +80,29 @@ try {
     jobDesc.value = "";
   });
 
-  // 🏗 POST PROJECT (REAL IMAGE UPLOAD - BASE64)
+  // 🖼 SAFE IMAGE CONVERTER (NO STORAGE NEEDED)
+  function readFile(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // 🏗 POST PROJECT (FIXED + SAFE)
   document.getElementById("postProjectBtn").addEventListener("click", async () => {
 
-    const file = projectImageFile.files[0];
+    const file = projectImage.files ? projectImage.files[0] : null;
 
     if (!projectTitle.value || !projectDesc.value || !file) {
-      alert("Fill all project fields + choose image");
+      alert("Fill all fields + select image");
       return;
     }
 
     try {
 
-      const imageBase64 = await toBase64(file);
+      const imageBase64 = await readFile(file);
 
       await projectsRef.add({
         title: projectTitle.value,
@@ -113,10 +113,10 @@ try {
 
       projectTitle.value = "";
       projectDesc.value = "";
-      projectImageFile.value = "";
+      projectImage.value = "";
 
     } catch (err) {
-      alert(err.message);
+      alert("Upload error: " + err.message);
     }
 
   });
@@ -155,6 +155,6 @@ try {
   });
 
 } catch (e) {
-  console.error(e);
+  console.error("FIREBASE ERROR:", e);
 }
 </script>
