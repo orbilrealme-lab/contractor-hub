@@ -1,3 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Contractor Hub</title>
+
+  <style>
+    body {
+      background:#0f172a;
+      color:white;
+      font-family: Arial;
+      margin:0;
+    }
+
+    header {
+      padding:20px;
+      background:#111827;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    .btn {
+      background:#38bdf8;
+      border:none;
+      padding:10px 15px;
+      border-radius:8px;
+      cursor:pointer;
+    }
+
+    section {
+      padding:20px;
+    }
+
+    .card {
+      background:#1f2937;
+      padding:15px;
+      margin:10px 0;
+      border-radius:10px;
+    }
+
+    #adminPanel {
+      display:none;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h2>Contractor Hub</h2>
+  <button class="btn" id="loginBtn">Admin Login</button>
+</header>
+
+<section id="jobSection">
+  <h3>Jobs</h3>
+
+  <div class="card">Loading jobs...</div>
+</section>
+
+<section id="adminPanel">
+  <h3>Admin Panel</h3>
+
+  <div class="card">
+    <input id="jobTitle" placeholder="Job title"><br><br>
+    <textarea id="jobDesc" placeholder="Job description"></textarea><br><br>
+    <button class="btn" id="postBtn">Post Job</button>
+  </div>
+</section>
+
+<footer style="padding:20px; text-align:center;">
+  © 2026 Contractor Hub
+</footer>
+
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -5,6 +79,7 @@
 <script>
 try {
 
+  // 🔥 Firebase Config
   const firebaseConfig = {
     apiKey: "AIzaSyDl9EaTbDx0MTV4c0bIJ4ZQsBfpJ3zqeYQ",
     authDomain: "contractor-hub-d69e9.firebaseapp.com",
@@ -20,11 +95,11 @@ try {
   const db = firebase.firestore();
   const provider = new firebase.auth.GoogleAuthProvider();
 
+  const jobsRef = db.collection("jobs");
+
   const loginBtn = document.getElementById("loginBtn");
   const adminPanel = document.getElementById("adminPanel");
-  const jobContainer = document.querySelector("section");
-
-  const jobsRef = db.collection("jobs");
+  const jobSection = document.getElementById("jobSection");
 
   // 🔐 LOGIN
   loginBtn.addEventListener("click", () => {
@@ -51,24 +126,26 @@ try {
       return;
     }
 
-    await jobsRef.add({
-      title: title,
-      desc: desc,
-      created: new Date()
-    });
+    try {
+      await jobsRef.add({
+        title: title,
+        desc: desc,
+        created: new Date()
+      });
 
-    document.getElementById("jobTitle").value = "";
-    document.getElementById("jobDesc").value = "";
+      document.getElementById("jobTitle").value = "";
+      document.getElementById("jobDesc").value = "";
+
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
 
   });
 
-  // 📡 REAL-TIME JOBS
+  // 📡 LIVE JOBS
   jobsRef.onSnapshot(snapshot => {
 
-    // keep header
-    jobContainer.innerHTML = `
-      <h3>Jobs</h3>
-    `;
+    jobSection.innerHTML = "<h3>Jobs</h3>";
 
     snapshot.forEach(doc => {
       const job = doc.data();
@@ -81,7 +158,7 @@ try {
         <p>${job.desc}</p>
       `;
 
-      jobContainer.appendChild(div);
+      jobSection.appendChild(div);
     });
 
   });
@@ -90,3 +167,6 @@ try {
   console.error("Firebase error:", e);
 }
 </script>
+
+</body>
+</html>
