@@ -1,11 +1,66 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Test</title>
-</head>
-<body style="background:#0f172a; color:white;">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Contractor Hub</title>
 
-<h1>Website is working</h1>
+<style>
+  body {
+    background:#0f172a;
+    color:white;
+    font-family: Arial;
+  }
+  header {
+    padding:20px;
+    background:#111827;
+  }
+  .card {
+    background:#1f2937;
+    padding:15px;
+    margin:10px;
+    border-radius:10px;
+  }
+  .btn {
+    padding:10px 15px;
+    background:#38bdf8;
+    border:none;
+    cursor:pointer;
+    border-radius:8px;
+  }
+</style>
+
+</head>
+
+<body>
+
+<header>
+  <h1>Contractor Hub</h1>
+
+  <button class="btn" id="loginBtn">
+    Admin Login
+  </button>
+</header>
+
+<h2 style="padding:20px;">Website is working 🚀</h2>
+
+<section id="jobs">
+  <h3 style="padding:20px;">Jobs</h3>
+  <div id="jobList"></div>
+</section>
+
+<section id="adminPanel" style="display:none;">
+  <h3 style="padding:20px;">Admin Panel</h3>
+
+  <input id="jobTitle" placeholder="Job title"><br><br>
+  <textarea id="jobDesc" placeholder="Job description"></textarea><br><br>
+
+  <button class="btn" onclick="addJob()">Post Job</button>
+</section>
+
+<footer style="padding:20px;">
+  © 2026 Contractor Hub
+</footer>
 
 </body>
 </html>
