@@ -18,14 +18,14 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 
-// 🔥 YOUR FIREBASE CONFIG (REPLACE THIS)
+// 🔥 YOUR FIREBASE CONFIG (NOW FILLED)
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDl9EaTbDx0MTV4c0bIJ4ZQsBfpJ3zqeYQ",
+  authDomain: "contractor-hub-d69e9.firebaseapp.com",
+  projectId: "contractor-hub-d69e9",
+  storageBucket: "contractor-hub-d69e9.firebasestorage.app",
+  messagingSenderId: "114205018575",
+  appId: "1:114205018575:web:723805aa99a7e9d0372aba"
 };
 
 
@@ -36,7 +36,7 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 
-// 🔐 LOGIN BUTTON
+// 🔐 GOOGLE LOGIN
 document.getElementById("loginBtn").addEventListener("click", async () => {
   try {
     await signInWithPopup(auth, provider);
@@ -61,6 +61,7 @@ const jobsRef = collection(db, "jobs");
 
 // 📝 ADD JOB FUNCTION
 window.addJob = async function () {
+
   const title = document.getElementById("jobTitle").value;
   const desc = document.getElementById("jobDesc").value;
 
@@ -85,7 +86,7 @@ window.addJob = async function () {
 };
 
 
-// 📡 REAL-TIME JOB LOADING
+// 📡 REAL-TIME JOB DISPLAY
 const jobList = document.getElementById("jobList");
 
 onSnapshot(jobsRef, (snapshot) => {
