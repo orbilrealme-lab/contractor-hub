@@ -1,255 +1,75 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Contractor Hub</title>
+<script type="module">
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-<style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: "Inter", sans-serif;
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  onSnapshot,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+
+// 🔥 YOUR FIREBASE CONFIG (REPLACE THIS)
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+
+// 🚀 INIT FIREBASE
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+
+// 🔐 LOGIN BUTTON
+document.getElementById("loginBtn").addEventListener("click", async () => {
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (err) {
+    alert("Login error: " + err.message);
+  }
+});
+
+
+// 👤 SHOW ADMIN PANEL AFTER LOGIN
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    document.getElementById("adminPanel").style.display = "block";
+    document.getElementById("loginBtn").innerText = "Logged In";
+  }
+});
+
+
+// 🧠 FIRESTORE COLLECTION
+const jobsRef = collection(db, "jobs");
+
+
+// 📝 ADD JOB FUNCTION
+window.addJob = async function () {
+  const title = document.getElementById("jobTitle").value;
+  const desc = document.getElementById("jobDesc").value;
+
+  if (!title || !desc) {
+    alert("Please fill all fields");
+    return;
   }
 
-  body {
-    background: #0f172a;
-    color: #e2e8f0;
-  }
-
-  header {
-    padding: 20px 60px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(15, 23, 42, 0.9);
-    position: sticky;
-    top: 0;
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid #1e293b;
-  }
-
-  header h1 {
-    font-size: 20px;
-    color: #38bdf8;
-  }
-
-  nav a {
-    margin-left: 20px;
-    text-decoration: none;
-    color: #cbd5e1;
-    font-weight: 500;
-  }
-
-  nav a:hover {
-    color: #38bdf8;
-  }
-
-  .hero {
-    text-align: center;
-    padding: 100px 20px;
-    background: linear-gradient(135deg, #0f172a, #1e293b);
-  }
-
-  .hero h2 {
-    font-size: 42px;
-    margin-bottom: 10px;
-  }
-
-  .hero p {
-    color: #94a3b8;
-    max-width: 600px;
-    margin: auto;
-  }
-
-  .btn {
-    margin-top: 20px;
-    padding: 12px 24px;
-    background: #38bdf8;
-    border: none;
-    color: #0f172a;
-    font-weight: bold;
-    border-radius: 8px;
-    cursor: pointer;
-  }
-
-  section {
-    padding: 60px 20px;
-    max-width: 1100px;
-    margin: auto;
-  }
-
-  h3 {
-    font-size: 28px;
-    margin-bottom: 20px;
-    color: #38bdf8;
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
-  }
-
-  .card {
-    background: #1e293b;
-    padding: 20px;
-    border-radius: 12px;
-    border: 1px solid #334155;
-  }
-
-  .card h4 {
-    margin-bottom: 10px;
-    color: #e2e8f0;
-  }
-
-  .tag {
-    display: inline-block;
-    margin-top: 10px;
-    padding: 4px 10px;
-    font-size: 12px;
-    background: #0ea5e9;
-    color: #0f172a;
-    border-radius: 20px;
-  }
-
-  footer {
-    text-align: center;
-    padding: 30px;
-    border-top: 1px solid #1e293b;
-    color: #94a3b8;
-  }
-
-  @media(max-width: 600px){
-    header {
-      padding: 15px 20px;
-    }
-    .hero h2 {
-      font-size: 30px;
-    }
-  }
-</style>
-</head>
-
-<body>
-
-<header>
-  <h1>Contractor Hub</h1>
-  <nav>
-    <a href="#jobs">Jobs</a>
-    <a href="#projects">Projects</a>
-    <a href="#contact">Contact</a>
-
-   <button class="btn" id="loginBtn">
-  Admin Login
-</button>
-  </nav>
-</header>
-
-<div class="hero">
-  <h2>Find Contractors & Showcase Projects</h2>
-  <p>A modern platform for posting construction jobs, hiring skilled workers, and showcasing completed projects.</p>
-  <button class="btn" onclick="document.getElementById('jobs').scrollIntoView({behavior:'smooth'})">
-    View Listings
-  </button>
-</div>
-
-<section id="jobs">
-  <h3>🔨 Hiring Contractors</h3>
-  <div class="grid" id="jobList"></div>
-
-    <div class="card">
-      <h4>House Renovation Worker</h4>
-      <p>Looking for skilled workers for kitchen and bathroom renovation in Marikina.</p>
-      <span class="tag">Urgent</span>
-    </div>
-
-    <div class="card">
-      <h4>Painter Needed</h4>
-      <p>Interior and exterior painting for residential house project.</p>
-      <span class="tag">2 Weeks</span>
-    </div>
-
-    <div class="card">
-      <h4>Electrician Job</h4>
-      <p>Need licensed electrician for wiring installation in new building.</p>
-      <span class="tag">High Pay</span>
-    </div>
-
-  </div>
-</section>
-
-<section id="projects">
-  <h3>🏗️ Completed Projects</h3>
-  <div class="grid">
-
-    <div class="card">
-      <h4>Modern House Build</h4>
-      <p>2-storey residential home completed in 2026 with minimalist design.</p>
-    </div>
-
-    <div class="card">
-      <h4>Office Renovation</h4>
-      <p>Full interior redesign of corporate office space.</p>
-    </div>
-
-    <div class="card">
-      <h4>Kitchen Upgrade</h4>
-      <p>Modern kitchen remodel with custom cabinetry and lighting.</p>
-    </div>
-
-  </div>
-</section>
-
-<section id="contact">
-  <h3>📩 Contact</h3>
-  <div class="card">
-    <p>Email: youremail@example.com</p>
-    <p>Phone: +63 9XX XXX XXXX</p>
-    <p>Post your job or inquiry anytime.</p>
-  </div>
-</section>
-
-<footer>
-  © 2026 Contractor Hub. All rights reserved.
-</footer>
-
- <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { 
-    getFirestore, 
-    collection, 
-    addDoc, 
-    onSnapshot, 
-    serverTimestamp 
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-  // 1. YOUR FIREBASE CONFIG (replace this!)
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
-
-  // 2. INIT FIREBASE
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  const jobsRef = collection(db, "jobs");
-
-  // 3. POST JOB
-  window.addJob = async function () {
-    const title = document.getElementById("jobTitle").value;
-    const desc = document.getElementById("jobDesc").value;
-
-    if (!title || !desc) return alert("Please fill all fields");
-
+  try {
     await addDoc(jobsRef, {
       title,
       desc,
@@ -258,31 +78,33 @@
 
     document.getElementById("jobTitle").value = "";
     document.getElementById("jobDesc").value = "";
-  };
 
-  // 4. REAL-TIME LOAD JOBS
-  const jobList = document.getElementById("jobList");
+  } catch (err) {
+    alert("Error adding job: " + err.message);
+  }
+};
 
-  onSnapshot(jobsRef, (snapshot) => {
-    jobList.innerHTML = "";
 
-    snapshot.forEach((doc) => {
-      const job = doc.data();
+// 📡 REAL-TIME JOB LOADING
+const jobList = document.getElementById("jobList");
 
-      const card = document.createElement("div");
-      card.className = "card";
+onSnapshot(jobsRef, (snapshot) => {
+  jobList.innerHTML = "";
 
-      card.innerHTML = `
-        <h4>${job.title}</h4>
-        <p>${job.desc}</p>
-        <span class="tag">Live</span>
-      `;
+  snapshot.forEach((doc) => {
+    const job = doc.data();
 
-      jobList.prepend(card);
-    });
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <h4>${job.title}</h4>
+      <p>${job.desc}</p>
+      <span class="tag">LIVE</span>
+    `;
+
+    jobList.prepend(card);
   });
+});
 
 </script>
- 
-</body>
-</html>
