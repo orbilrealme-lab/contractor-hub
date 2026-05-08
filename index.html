@@ -26,13 +26,25 @@ try {
   const jobList = document.getElementById("jobList");
   const projectList = document.getElementById("projectList");
 
-  // ✅ FIXED INPUT REFERENCES
+  // ✅ INPUTS
   const jobTitle = document.getElementById("jobTitle");
   const jobDesc = document.getElementById("jobDesc");
 
   const projectTitle = document.getElementById("projectTitle");
-  const projectImage = document.getElementById("projectImage");
   const projectDesc = document.getElementById("projectDesc");
+
+  // ⚠️ NEW: file input (YOU MUST CHANGE HTML INPUT TO type="file")
+  const projectImageFile = document.getElementById("projectImage");
+
+  // 🧠 CONVERT IMAGE → BASE64
+  function toBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+    });
+  }
 
   // 🔐 LOGIN
   loginBtn.addEventListener("click", () => {
@@ -60,7 +72,7 @@ try {
 
   });
 
-  // 📝 POST JOB (FIXED)
+  // 📝 POST JOB
   document.getElementById("postJobBtn").addEventListener("click", async () => {
 
     if (!jobTitle.value || !jobDesc.value) {
@@ -78,24 +90,35 @@ try {
     jobDesc.value = "";
   });
 
-  // 🏗 POST PROJECT (FIXED)
+  // 🏗 POST PROJECT (REAL IMAGE UPLOAD - BASE64)
   document.getElementById("postProjectBtn").addEventListener("click", async () => {
 
-    if (!projectTitle.value || !projectImage.value || !projectDesc.value) {
-      alert("Fill all project fields");
+    const file = projectImageFile.files[0];
+
+    if (!projectTitle.value || !projectDesc.value || !file) {
+      alert("Fill all project fields + choose image");
       return;
     }
 
-    await projectsRef.add({
-      title: projectTitle.value,
-      imageUrl: projectImage.value,
-      description: projectDesc.value,
-      created: new Date()
-    });
+    try {
 
-    projectTitle.value = "";
-    projectImage.value = "";
-    projectDesc.value = "";
+      const imageBase64 = await toBase64(file);
+
+      await projectsRef.add({
+        title: projectTitle.value,
+        description: projectDesc.value,
+        imageUrl: imageBase64,
+        created: new Date()
+      });
+
+      projectTitle.value = "";
+      projectDesc.value = "";
+      projectImageFile.value = "";
+
+    } catch (err) {
+      alert(err.message);
+    }
+
   });
 
   // 📡 JOBS LIVE
@@ -123,7 +146,7 @@ try {
 
       projectList.innerHTML += `
         <div class="card">
-          <img src="${p.imageUrl}" />
+          <img src="${p.imageUrl}" style="width:100%; border-radius:10px;" />
           <h4>${p.title}</h4>
           <p>${p.description}</p>
         </div>
