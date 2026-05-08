@@ -1,52 +1,12 @@
-<script type="module">
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+</head>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getAuth,
-  GoogleAuthProvider,
-  signInWithPopup,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+<body style="background:#0f172a; color:white;">
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDl9EaTbDx0MTV4c0bIJ4ZQsBfpJ3zqeYQ",
-  authDomain: "contractor-hub-d69e9.firebaseapp.com",
-  projectId: "contractor-hub-d69e9",
-  storageBucket: "contractor-hub-d69e9.firebasestorage.app",
-  messagingSenderId: "114205018575",
-  appId: "1:114205018575:web:723805aa99a7e9d0372aba"
-};
+<h1>BASE HTML WORKS</h1>
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-
-window.addEventListener("DOMContentLoaded", () => {
-
-  const loginBtn = document.querySelector("header .btn");
-  const adminPanel = document.querySelectorAll("section")[1];
-
-  if (!loginBtn) {
-    console.error("Login button not found");
-    return;
-  }
-
-  loginBtn.addEventListener("click", async () => {
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (err) {
-      console.error(err);
-      alert(err.message);
-    }
-  });
-
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      loginBtn.innerText = "Logged In";
-      adminPanel.style.display = "block";
-    }
-  });
-
-});
-
-</script>
+</body>
+</html>
