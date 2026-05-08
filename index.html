@@ -18,7 +18,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 
-// 🔥 YOUR FIREBASE CONFIG (NOW FILLED)
+// 🔥 FIREBASE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyDl9EaTbDx0MTV4c0bIJ4ZQsBfpJ3zqeYQ",
   authDomain: "contractor-hub-d69e9.firebaseapp.com",
@@ -29,20 +29,32 @@ const firebaseConfig = {
 };
 
 
-// 🚀 INIT FIREBASE
+// 🚀 INIT
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 
-// 🔐 GOOGLE LOGIN
-document.getElementById("loginBtn").addEventListener("click", async () => {
-  try {
-    await signInWithPopup(auth, provider);
-  } catch (err) {
-    alert("Login error: " + err.message);
+// 🧠 FIRESTORE
+const jobsRef = collection(db, "jobs");
+
+
+// 🔐 LOGIN (FIXED — NO MORE CLICK BUG)
+window.addEventListener("DOMContentLoaded", () => {
+
+  const loginBtn = document.getElementById("loginBtn");
+
+  if (loginBtn) {
+    loginBtn.addEventListener("click", async () => {
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (err) {
+        alert("Login error: " + err.message);
+      }
+    });
   }
+
 });
 
 
@@ -55,11 +67,7 @@ onAuthStateChanged(auth, (user) => {
 });
 
 
-// 🧠 FIRESTORE COLLECTION
-const jobsRef = collection(db, "jobs");
-
-
-// 📝 ADD JOB FUNCTION
+// 📝 ADD JOB
 window.addJob = async function () {
 
   const title = document.getElementById("jobTitle").value;
@@ -90,6 +98,7 @@ window.addJob = async function () {
 const jobList = document.getElementById("jobList");
 
 onSnapshot(jobsRef, (snapshot) => {
+
   jobList.innerHTML = "";
 
   snapshot.forEach((doc) => {
@@ -106,6 +115,7 @@ onSnapshot(jobsRef, (snapshot) => {
 
     jobList.prepend(card);
   });
+
 });
 
 </script>
